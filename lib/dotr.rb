@@ -57,7 +57,7 @@ module DotR
       Tempfile.open("diag") do |input|
         input.write(self.to_s)
         input.flush
-        return IO.popen("dot -T#{format} #{input.path}") { |dot| dot.read }
+        return IO.popen("dot -T#{format} #{input.path}", 'rb') { |dot| dot.read }
       end
     end
 
