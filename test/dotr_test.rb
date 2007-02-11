@@ -102,10 +102,33 @@ class DotRDigraphTest < Test::Unit::TestCase
     END
   end
 
+  def test_can_style_nodes_independently
+    d = DotR::Digraph.new do |graph|
+      graph.node('foo', :fontsize => 8)
+      graph.node('bar', :fontsize => 5, :label => "Bar")
+    end
+    assert_digraph_equals <<-END, d
+      digraph "diagram" {
+        "foo" [fontsize="8",label="foo"];
+        "bar" [fontsize="5",label="Bar"];
+      }
+    END
+  end
+
+  def test_can_style_empty_graph
+    d = DotR::Digraph.new('myname', :fontsize => 6)
+    assert_digraph_equals <<-END, d
+      digraph "myname" {
+        fontsize="6";
+      }
+    END
+  end
+
   private
 
   def assert_digraph_equals expected, digraph
-    assert_equal(expected.strip.gsub(/^\s+/, ''), digraph.to_s.strip)
+    prefix = expected.scan(/^(\s+)/).first
+    assert_equal(expected.strip.gsub(/^#{prefix}/, ''), digraph.to_s.strip)
   end
 
 end

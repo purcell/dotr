@@ -1,4 +1,22 @@
 module DotR
+  module Styled # :nodoc:
+    def method_missing(method, *args)
+      return super unless /^(\w+)=$/ =~ method.to_s && args.size == 1
+      style_attrs()[$1.to_sym] = args.first
+    end
+
+    def style
+      return '' if style_attrs.empty?
+      " [" + style_attrs.keys.sort_by { |k| k.to_s }.map { |k| "#{k}=\"#{style_attrs[k]}\"" }.join(',') + "]"
+    end
+
+    private
+
+    def style_attrs
+      @style_attrs ||= {}
+    end
+  end
+
   # This class represents a directed graph that can be rendered to a graphics
   # image using its #diagram method.
   #
@@ -14,12 +32,19 @@ module DotR
   #   end
   #   File.open('diagram.png', 'w') { |f| f.write(d.diagram(:png)) }
   class Digraph
+    include Styled
     attr_accessor :name
+
     # Create a new Digraph.  If a block is provided it will be called with
     # the graph as a parameter.
-    def initialize(name="diagram", &block)
+    #
+    # Specify styles on this object by setting instance attributes.
+    # Possible attributes include 'label' and 'fontsize'; the attribute names and
+    # possible values correspond to the style attributes described in the 'dot' manual.
+    def initialize(name="diagram", style={}, &block)
       @name = name
       @nodes = []
+      style_attrs.update(style)
       yield self if block
     end
 
@@ -66,30 +91,15 @@ module DotR
     def render_to(output_lines)
       output_lines << "digraph \"#{name}\" {"
       @nodes.each { |node| node.render_to(output_lines) }
+      style_attrs.each do |k,v|
+        output_lines << "  #{k}=\"#{v}\";"
+      end
       output_lines << '}'
     end
-
   end
+
 
   private
-
-  module Styled # :nodoc:
-    def method_missing(method, *args)
-      return super unless /^(\w+)=$/ =~ method.to_s && args.size == 1
-      style_attrs()[$1.to_sym] = args.first
-    end
-
-    def style
-      return '' if style_attrs.empty?
-      " [" + style_attrs.keys.sort_by { |k| k.to_s }.map { |k| "#{k}=\"#{style_attrs[k]}\"" }.join(',') + "]"
-    end
-
-    private
-
-    def style_attrs
-      @style_attrs ||= {}
-    end
-  end
 
   # Represents a node in a digraph.  Instances of this class are created by calling
   # Digraph#node.
@@ -114,7 +124,7 @@ module DotR
     end
 
     def render_to(output_lines)  #:nodoc:
-      output_lines << "\"#{self.name}\"" + style + ";"
+      output_lines << "  \"#{self.name}\"" + style + ";"
       @connections.each { |c| c.render_to(output_lines) }
     end
   end
@@ -138,7 +148,7 @@ module DotR
     end
 
     def render_to(output_lines)  # :nodoc:
-      output_lines << "\"#{from_name}\" -> \"#{to_name}\"" + style + ";"
+      output_lines << "  \"#{from_name}\" -> \"#{to_name}\"" + style + ";"
     end
   end
 end
