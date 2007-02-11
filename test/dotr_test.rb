@@ -124,6 +124,18 @@ class DotRDigraphTest < Test::Unit::TestCase
     END
   end
 
+  def test_can_define_empty_subgraph
+    d = DotR::Digraph.new('myname') do |g|
+      g.subgraph('subg')
+    end
+    assert_digraph_equals <<-END, d
+      digraph "myname" {
+        subgraph "subg" {
+        }
+      }
+    END
+  end
+
   private
 
   def assert_digraph_equals expected, digraph

@@ -44,6 +44,7 @@ module DotR
     def initialize(name="diagram", style={}, &block)
       @name = name
       @nodes = []
+      @subgraphs = []
       style_attrs.update(style)
       yield self if block
     end
@@ -67,10 +68,14 @@ module DotR
       end
     end
 
+    def subgraph(name, style={}, &block)
+      @subgraphs << self.class.new(name, style, &block)
+    end
+
     # Returns the dot input script equivalent of this digraph
     def to_s
       script = []
-      render_to(script)
+      render_to("digraph", script)
       script.flatten.join("\n") + "\n"
     end
 
@@ -86,15 +91,14 @@ module DotR
       end
     end
 
-    private
-
-    def render_to(output_lines)
-      output_lines << "digraph \"#{name}\" {"
-      @nodes.each { |node| node.render_to(output_lines) }
+    def render_to(graph_type, output_lines, indent="")
+      output_lines << "#{indent}#{graph_type} \"#{name}\" {"
+      @subgraphs.each { |node| node.render_to("subgraph", output_lines, indent + "  ") }
+      @nodes.each { |node| node.render_to(output_lines, indent + "  ") }
       style_attrs.each do |k,v|
-        output_lines << "  #{k}=\"#{v}\";"
+        output_lines << "#{indent}  #{k}=\"#{v}\";"
       end
-      output_lines << '}'
+      output_lines << "#{indent}}"
     end
   end
 
@@ -123,9 +127,9 @@ module DotR
       @connections << Connection.new(self.name, other_node_name, style, &block)
     end
 
-    def render_to(output_lines)  #:nodoc:
-      output_lines << "  \"#{self.name}\"" + style + ";"
-      @connections.each { |c| c.render_to(output_lines) }
+    def render_to(output_lines, indent)  #:nodoc:
+      output_lines << "#{indent}\"#{self.name}\"" + style + ";"
+      @connections.each { |c| c.render_to(output_lines, indent) }
     end
   end
 
@@ -147,8 +151,8 @@ module DotR
       yield self if block
     end
 
-    def render_to(output_lines)  # :nodoc:
-      output_lines << "  \"#{from_name}\" -> \"#{to_name}\"" + style + ";"
+    def render_to(output_lines, indent)  # :nodoc:
+      output_lines << "#{indent}\"#{from_name}\" -> \"#{to_name}\"" + style + ";"
     end
   end
 end
