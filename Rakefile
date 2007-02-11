@@ -4,7 +4,7 @@ require 'rake/gempackagetask'
 require 'rake/contrib/rubyforgepublisher'
 
 # Meta -------------------------------
-PKG_VERSION = "0.1"
+PKG_VERSION = "0.3"
 RUBYFORGE_PROJECT = "dotr"
 RUBYFORGE_USER = "purcell"
 PKG_NAME = "DotR"
