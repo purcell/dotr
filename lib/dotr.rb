@@ -57,7 +57,7 @@ module DotR
     end
 
     # Create a connection in the graph between two nodes with the given names.
-    # If a block is provided # it will be called with the connection as a parameter,
+    # If a block is provided it will be called with the connection as a parameter,
     # for convenient specification of styles.
     #
     # Nodes with the given names are implicitly created if they have not
@@ -68,6 +68,16 @@ module DotR
       end
     end
 
+    # Create a subgraph of the same type, which can have distinct formatting
+    # and its own nodes.
+    #
+    # Example:
+    #
+    #   d = DotR::Digraph.new('myname') do |g|
+    #     g.subgraph('subg', :color => "lightgrey") do |s|
+    #       s.connection("foo", "bar")
+    #     end
+    #   end
     def subgraph(name, style={}, &block)
       @subgraphs << self.class.new(name, style, &block)
     end
