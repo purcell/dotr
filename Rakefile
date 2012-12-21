@@ -43,7 +43,7 @@ Rake::RDocTask.new { |rdoc|
   rdoc.rdoc_dir = 'doc'
   rdoc.title    = PKG_NAME + " -- " + PKG_SUMMARY
   rdoc.options << '--line-numbers' << '--inline-source' << '--accessor' << 'cattr_accessor=object'
-  rdoc.rdoc_files.include('README')
+  rdoc.rdoc_files.include('README.md')
   rdoc.rdoc_files.include('lib/*.rb')
 }
 
